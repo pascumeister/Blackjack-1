@@ -73,35 +73,18 @@ class Dealer(Player):
         self.hand.append(deck.deal_card())
 
     def check_for_win(self, player, dealer):
-        if int(player.calculate_hand()) > 21:
+        """ I cleaned this up a bit """
+        if int(player.calculate_hand()) > 21 or int(
+                dealer.calculate_hand()) == 21 or int(
+                dealer.calculate_hand()) > int(player.calculate_hand()):
             print("You Lose")
             self.is_there_a_winner = True
-            pass
 
-        elif int(dealer.calculate_hand()) > 21:
+        elif int(dealer.calculate_hand()) > 21 or int(
+                player.calculate_hand()) == 21 or int(
+                player.calculate_hand()) > int(dealer.calculate_hand()):
             print("You win")
             self.is_there_a_winner = True
-            pass
-
-        elif int(dealer.calculate_hand()) == 21:
-            print('You Lose')
-            self.is_there_a_winner = True
-            pass
-
-        elif int(player.calculate_hand()) == 21:
-            print("You Win")
-            self.is_there_a_winner = True
-            pass
-
-        elif int(player.calculate_hand()) > int(dealer.calculate_hand()):
-            print("You Win")
-            self.is_there_a_winner = True
-            pass
-
-        elif int(dealer.calculate_hand()) > int(player.calculate_hand()):
-            print("You Lose")
-            self.is_there_a_winner = True
-            pass
 
     def check_for_lose(self, player):
         if int(player.calculate_hand()) > 21:
@@ -112,14 +95,10 @@ class Dealer(Player):
             print("You Win")
             self.is_there_a_winner = True
 
-        else:
-            pass
-
     def new_hand(self, player, dealer, deck):
         player.hand = []
         dealer.hand = []
         begin_game()
-
 
 def begin_game():
     dealer1.deal_cards(player1, deck1)
@@ -129,41 +108,54 @@ def begin_game():
     print("\nThe DEALER's hand is: " + str(dealer1.hand))
     print("Count: " + str(dealer1.calculate_hand()) + "\n")
 
-
-dealer1 = Dealer("Dealer")
-deck1 = Deck(deck)
-deck1.shuffle_deck()
-print("\nWelcome to Blackjack!\n")
-name = input("Please input your name: ")
-player1 = Player(name, 100)
-print(f"\n Welcome {name}!  You will have $100 to begin with.\n")
-
-begin_game()
-while dealer1.is_there_a_winner == False:
-    if player1.stay == False and dealer1.stay == False:
-        hit_stay = input("'hit' or 'stay'?: ")
+def game_mechanics():
+    """ It looks a bit cleaner if the mechanics are within a function.
+    Also, the loop was open ended, and you had too many nested ifs.
+    """
+    while dealer1.is_there_a_winner == False:
+        print("'hit' or 'stay'?: ")
+        hit_stay = input()
         if hit_stay == "stay":
-            player1.stay = True
+            player1.staying
+            dealer1.check_for_lose(player1)
         elif hit_stay == "hit":
             player1.hit(deck1)
             dealer1.check_for_lose(player1)
-            if dealer1.is_there_a_winner == True:
-                break
-        if dealer1.calculate_hand() < 16:
+
+        if dealer1.is_there_a_winner == True:
+            break
+        elif dealer1.calculate_hand() < 16:
             dealer1.hit(deck1)
             dealer1.check_for_lose(dealer1)
         elif dealer1.calculate_hand() == 21:
             dealer1.stay == True
-        else:
-            pass
+        elif player1.stay == True or dealer1.stay == False:
+            if dealer1.calculate_hand() < 16:
+                dealer1.hit(deck1)
+                dealer1.check_for_lose(dealer1)
+            elif dealer1.calculate_hand() >= 16:
+                dealer1.stay == True
+                dealer1.check_for_win(player1, dealer1)
+        elif player1.stay == True and dealer1.stay == True:
+            dealer1.checker_for_win(player1, dealer1)
 
-    elif player1.stay == True or dealer1.stay == False:
-        if dealer1.calculate_hand() < 16:
-            dealer1.hit(deck1)
-            dealer1.check_for_lose(dealer1)
-        if dealer1.calculate_hand() >= 16:
-            dealer1.stay == True
-            dealer1.check_for_win(player1, dealer1)
+dealer1 = Dealer("Dealer")
+deck1 = Deck(deck)
 
-    elif player1.stay == True and dealer1.stay == True:
-        dealer1.checker_for_win(player1, dealer1)
+def start():
+    deck1.shuffle_deck()
+
+print("\nWelcome to Blackjack!\n")
+print("Please enter your name: ")
+name = input()
+player1 = Player(name, 100)
+print(f"\n Welcome {name}!  You will have $100 to begin with.\n")
+begin_game()
+game_mechanics()
+
+print("Would you like to start over? Yes/No")
+start_over = input()
+if start_over.lower() == "yes":
+    start()
+else:
+    print("Thanks for playing!")
